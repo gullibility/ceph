@@ -21,10 +21,16 @@ if test -d ".git" ; then
 fi
 AC_MSG_NOTICE([RPM_RELEASE='$RPM_RELEASE'])
 
-AC_CHECK_PROGS(SPHINX_BUILD, sphinx-1.0-build sphinx-build, no)
-if test x"$SPHINX_BUILD" = x"no"; then
-  AC_MSG_ERROR([sphinx-build not found (python-sphinx)])
-fi
+AC_ARG_WITH([man-pages],
+    [AS_HELP_STRING([--with-man-pages], [build man pages])],
+    [],
+    [with_man_pages=check])
+AS_IF([test "x$with_man_pages" != "xno"],
+  [AC_CHECK_PROGS(SPHINX_BUILD, sphinx-1.0-build sphinx-build)
+   AS_IF([test -z "$SPHINX_BUILD" && \
+          test "x$with_man_pages" = "xyes"],
+     [AC_MSG_ERROR([sphinx-build not found (python-sphinx)])])])
+AM_CONDITIONAL(WITH_MAN_PAGES, test -n "$SPHINX_BUILD")
 
 AC_CONFIG_MACRO_DIR([m4])
 
@@ -1215,5 +1221,6 @@ AC_CONFIG_FILES([Makefile
 	src/java/Makefile
 	src/tracing/Makefile
 	man/Makefile
+	doc/Makefile
 	ceph.spec])
 AC_OUTPUT
